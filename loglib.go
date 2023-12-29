@@ -1,21 +1,29 @@
 package logovi
 
 import (
+	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/natefinch/lumberjack.v2"
 	"net/http"
-	"os"
 )
 
-func LogInit(path string) (*log.Logger, any) {
+func LogInit(path string) (*log.Logger, mux.MiddlewareFunc) {
 	logger := log.New()
 	logger.SetFormatter(&log.JSONFormatter{})
 
-	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logger.Out = &lumberjack.Logger{
+		Filename:   path,
+		MaxSize:    500, // megabytes
+		MaxBackups: 3,
+		MaxAge:     28,   //days
+		Compress:   true, // disabled by default
+	}
+	/*file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err == nil {
 		logger.Out = file
 	} else {
 		log.Error("Ne mogu postaviti fajl za čuvanje logova. Koristiću osnovni izlaz.")
-	}
+	}*/
 
 	loggingMiddleware := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
