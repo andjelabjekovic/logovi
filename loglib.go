@@ -1,13 +1,14 @@
 package logovi
 
 import (
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"net/http"
 )
 
-func LogInit(path string) (*log.Logger, mux.MiddlewareFunc, func(r *http.Request, msg string), func(r *http.Request, msg string), func(r *http.Request, msg string)) {
+func LogInit(path string, appName string) (*log.Logger, mux.MiddlewareFunc, func(r *http.Request, msg string), func(r *http.Request, msg string), func(r *http.Request, msg string)) {
 	logger := log.New()
 	logger.SetFormatter(&log.JSONFormatter{})
 
@@ -51,6 +52,8 @@ func LogInit(path string) (*log.Logger, mux.MiddlewareFunc, func(r *http.Request
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Do stuff here
 			logger.WithFields(log.Fields{
+				"id":     uuid.New().String(),
+				"app":    appName,
 				"method": r.Method,
 				"url":    r.RequestURI,
 				"ip":     r.RemoteAddr,
