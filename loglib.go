@@ -28,23 +28,29 @@ func LogInit(path string, appName string) (*log.Logger, mux.MiddlewareFunc, func
 
 	writeFatal := func(r *http.Request, msg string) {
 		logger.WithFields(log.Fields{
+			"id":     uuid.New().String(),
+			"app":    appName,
 			"method": r.Method,
-			"url":    r.URL,
-			"ip":     r.Host,
+			"url":    r.RequestURI,
+			"ip":     r.RemoteAddr,
 		}).Fatal(msg)
 	}
 	writeInfo := func(r *http.Request, msg string) {
 		logger.WithFields(log.Fields{
+			"id":     uuid.New().String(),
+			"app":    appName,
 			"method": r.Method,
-			"url":    r.URL,
-			"ip":     r.Host,
+			"url":    r.RequestURI,
+			"ip":     r.RemoteAddr,
 		}).Info(msg)
 	}
 	writeWarning := func(r *http.Request, msg string) {
 		logger.WithFields(log.Fields{
+			"id":     uuid.New().String(),
+			"app":    appName,
 			"method": r.Method,
-			"url":    r.URL,
-			"ip":     r.Host,
+			"url":    r.RequestURI,
+			"ip":     r.RemoteAddr,
 		}).Warning(msg)
 	}
 
