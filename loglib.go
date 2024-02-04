@@ -11,10 +11,10 @@ import (
 func LogInit(path string, appName string) (*log.Logger, mux.MiddlewareFunc, func(r *http.Request, msg string), func(r *http.Request, msg string), func(r *http.Request, msg string)) {
 	logger := log.New()
 	logger.SetFormatter(&log.JSONFormatter{})
-
+	maxSizeMB := 0.002
 	logger.Out = &lumberjack.Logger{
 		Filename:   path,
-		MaxSize:    500, // megabytesloglib
+		MaxSize:    int(maxSizeMB), // megabytesloglib
 		MaxBackups: 3,
 		MaxAge:     28,   //days
 		Compress:   true, // disabled by default
