@@ -11,7 +11,7 @@ import (
 func LogInit(path string, appName string) (*log.Logger, mux.MiddlewareFunc, func(msg string), func(msg string)) {
 	logger := log.New()
 	logger.SetFormatter(&log.JSONFormatter{})
-	maxSizeMB := 0.002
+	maxSizeMB := 0.000588
 	logger.Out = &lumberjack.Logger{
 		Filename:   path,
 		MaxSize:    int(maxSizeMB), // megabytesloglib
