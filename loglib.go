@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func LogInit(path string, appName string) (*log.Logger, mux.MiddlewareFunc, func(r *http.Request, msg string), func(r *http.Request, msg string), func(r *http.Request, msg string)) {
+func LogInit(path string, appName string) (*log.Logger, mux.MiddlewareFunc, func(msg string), func(msg string)) {
 	logger := log.New()
 	logger.SetFormatter(&log.JSONFormatter{})
 	maxSizeMB := 0.002
@@ -26,32 +26,17 @@ func LogInit(path string, appName string) (*log.Logger, mux.MiddlewareFunc, func
 		log.Error("Ne mogu postaviti fajl za čuvanje logova. Koristiću osnovni izlaz.")
 	}*/
 
-	writeFatal := func(r *http.Request, msg string) {
+	writeError := func(msg string) {
 		logger.WithFields(log.Fields{
-			"id":     uuid.New().String(),
-			"app":    appName,
-			"method": r.Method,
-			"url":    r.RequestURI,
-			"ip":     r.RemoteAddr,
-		}).Fatal(msg)
+			"id":  uuid.New().String(),
+			"app": appName,
+		}).Error(msg)
 	}
-	writeInfo := func(r *http.Request, msg string) {
+	writeInfo := func(msg string) {
 		logger.WithFields(log.Fields{
-			"id":     uuid.New().String(),
-			"app":    appName,
-			"method": r.Method,
-			"url":    r.RequestURI,
-			"ip":     r.RemoteAddr,
+			"id":  uuid.New().String(),
+			"app": appName,
 		}).Info(msg)
-	}
-	writeWarning := func(r *http.Request, msg string) {
-		logger.WithFields(log.Fields{
-			"id":     uuid.New().String(),
-			"app":    appName,
-			"method": r.Method,
-			"url":    r.RequestURI,
-			"ip":     r.RemoteAddr,
-		}).Warning(msg)
 	}
 
 	loggingMiddleware := func(next http.Handler) http.Handler {
