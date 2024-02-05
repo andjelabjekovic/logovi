@@ -55,5 +55,5 @@ func LogInit(path string, appName string) (*log.Logger, mux.MiddlewareFunc, func
 			next.ServeHTTP(w, r)
 		})
 	}
-	return logger, loggingMiddleware, writeFatal, writeInfo, writeWarning
+	return logger, loggingMiddleware, writeInfo, writeError
 }
