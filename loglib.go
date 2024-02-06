@@ -8,13 +8,13 @@ import (
 	"net/http"
 )
 
-func LogInit(path string, appName string) (*log.Logger, mux.MiddlewareFunc, func(msg string), func(msg string)) {
+func LogInit(path string, appName string) (*log.Logger, mux.MiddlewareFunc, func(msg string), func(msg string), func(r *http.Request, msg string), func(r *http.Request, msg string)) {
 	logger := log.New()
 	logger.SetFormatter(&log.JSONFormatter{})
-	maxSizeMB := 0.000588
+
 	logger.Out = &lumberjack.Logger{
 		Filename:   path,
-		MaxSize:    int(maxSizeMB), // megabytesloglib
+		MaxSize:    1, // megabytesloglib
 		MaxBackups: 3,
 		MaxAge:     28,   //days
 		Compress:   true, // disabled by default
@@ -38,22 +38,41 @@ func LogInit(path string, appName string) (*log.Logger, mux.MiddlewareFunc, func
 			"app": appName,
 		}).Info(msg)
 	}
+	writeRequestError := func(r *http.Request, msg string) {
+		logger.WithFields(log.Fields{
+			"id":     uuid.New().String(),
+			"app":    appName,
+			"method": r.Method,
+			"url":    r.RequestURI,
+			"ip":     r.RemoteAddr,
+		}).Error(msg)
+	}
+	writeRequestInfo := func(r *http.Request, msg string) {
+		logger.WithFields(log.Fields{
+			"id":     uuid.New().String(),
+			"app":    appName,
+			"method": r.Method,
+			"url":    r.RequestURI,
+			"ip":     r.RemoteAddr,
+		}).Info(msg)
+	}
 
 	loggingMiddleware := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Do stuff here
-			logger.WithFields(log.Fields{
+			/*logger.WithFields(log.Fields{
 				"id":     uuid.New().String(),
 				"app":    appName,
 				"method": r.Method,
 				"url":    r.RequestURI,
 				"ip":     r.RemoteAddr,
-			}).Info("Request expected")
+			}).Info("Request expected")*/
 			//log.Info(r.Method, r.URL, r.Host)
+			writeRequestInfo(r, "Request expected")
 
 			// Call the next handler, which can be another middleware in the chain, or the final handler.
 			next.ServeHTTP(w, r)
 		})
 	}
-	return logger, loggingMiddleware, writeInfo, writeError
+	return logger, loggingMiddleware, writeInfo, writeError, writeRequestInfo, writeRequestError
 }
